@@ -1,3 +1,4 @@
+
 package org.morgan.test.MavenSparkApp;
 
 import java.util.List;
@@ -47,28 +48,29 @@ public class SQLUpdate implements UpdateSQL {
 			stmt = conn.createStatement();
 			String check;
 			String sql;
-			check = "SELECT user_id from recommendation";
-			ResultSet rs = stmt.executeQuery(check);
-			if (!rs.first() && !rs.next()) {// If first and next records are
-											// empty
-				// INSERT VALUES INTO TABLE
-				sql = "INSERT INTO recommendation " + "VALUES(" + user + ","
-						+ product + "," + rating + "," + order + ")";
-				System.out.println("Successfully wrote to Database");
-			} else {
-				// UPDATE VALUES IN TABLE
-				sql = "update test set listing_id=?, rating=? where test.user_id=? AND test.order=?";
-				PreparedStatement ps = conn.prepareStatement(sql);
+			System.out.println("Creating Statement");
+			stmt = conn.createStatement();
 
-				ps.setInt(1, product);
-				ps.setDouble(2, rating);
-				ps.setInt(3, user);
-				ps.setInt(4, order);
+			sql = "INSERT INTO test VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE listing_id=?, rating=?";
+			PreparedStatement statement = conn.prepareStatement(sql);
 
-				ps.executeUpdate();
+			statement.setInt(1, user);
+			statement.setInt(2, product);
+			statement.setDouble(3, rating);
+			statement.setInt(4, order);
+			statement.setInt(5, product);
+			statement.setDouble(6, rating);
 
-				System.out.println("Successfully Updated Table");
-			}
+			statement.executeUpdate();
+
+			System.out.println("Successfully wrote to Database");
+
+			System.out.println("Successfully Updated Table");
+
+			check = "SELECT * FROM test";
+			System.out.println("Successfully Created Statement");
+			ResultSet resultSet = stmt.executeQuery(check);
+			writeResultSet(resultSet);
 			stmt.close();
 			conn.close();
 		} catch (SQLException se) {
@@ -91,5 +93,23 @@ public class SQLUpdate implements UpdateSQL {
 		}
 		System.out.println("Program Ending");
 	}
+
+	private static void writeResultSet(ResultSet resultSet) throws SQLException {
+		// TODO Auto-generated method stub
+		System.out.println("Fetching Data");
+		while (resultSet.next()) {
+			int user = resultSet.getInt("user_id");
+			int listing = resultSet.getInt("listing_id");
+			int rating = resultSet.getInt("rating");
+			int order = resultSet.getInt("order");
+			System.out.println("User: " + user);
+			System.out.println("Listing: " + listing);
+			System.out.println("Rating: " + rating);
+			System.out.println("Order: " + order);
+
+		}
+		resultSet.close();
+	}
+	
 	
 }
